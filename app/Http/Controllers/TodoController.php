@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 use App\Models\Task;
@@ -11,7 +11,9 @@ class TodoController extends Controller
     //
     public function index()
     {
-        $tasks= Task::all();
+        $user=Auth::user();
+        $tasks=$user->tasks()->orderBy('created_at','desc')->get();
+
         return view('todo', ['tasks' => $tasks]);
     }
     public function create(){
@@ -22,9 +24,10 @@ class TodoController extends Controller
         $request->validate([
             'title' => 'required|string|max:255'
         ]);
-        Task::create([
-            'title' => $request->title
+        $request->user()->tasks()->create([
+            'title' => $request->title,
         ]);
+
 
         return redirect()->route('todo')->with('success', 'Task created successfully.');
     }
